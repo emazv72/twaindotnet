@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using TwainDotNet.TwainNative;
-using log4net;
+
+using NLog;
 
 namespace TwainDotNet
 {
@@ -11,7 +12,7 @@ namespace TwainDotNet
         /// <summary>
         /// The logger for this class.
         /// </summary>
-        static ILog log = LogManager.GetLogger(typeof(Capability));
+        private static Logger log = LogManager.GetCurrentClassLogger();
 
         Identity _applicationId;
         Identity _sourceId;

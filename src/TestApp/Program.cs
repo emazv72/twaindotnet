@@ -13,8 +13,6 @@ namespace TestApp
         [STAThread]
         static void Main()
         {
-            log4net.Config.BasicConfigurator.Configure();
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

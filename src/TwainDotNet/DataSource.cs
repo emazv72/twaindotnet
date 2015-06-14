@@ -430,7 +430,7 @@ namespace TwainDotNet
         public static DataSource GetDefault(Identity applicationId, IWindowsMessageHook messageHook)
         {
             var defaultSourceId = new Identity();
-
+            
             // Attempt to get information about the system default source
             var result = Twain32Native.DsmIdentity(
                 applicationId,

@@ -5,7 +5,8 @@ using System.Runtime.InteropServices;
 using TwainDotNet.Win32;
 using System.Reflection;
 using System.Drawing;
-using log4net;
+using NLog;
+
 
 namespace TwainDotNet
 {
@@ -14,7 +15,7 @@ namespace TwainDotNet
         /// <summary>
         /// The logger for this class.
         /// </summary>
-        static ILog log = LogManager.GetLogger(typeof(DataSourceManager));
+        private static Logger log = LogManager.GetCurrentClassLogger();
 
         IWindowsMessageHook _messageHook;
         Event _eventMessage;
@@ -93,6 +94,14 @@ namespace TwainDotNet
                 if (!scanning)
                 {
                     EndingScan();
+                    
+                    // Patch Emanuele: call complete event when scan fails
+                    try
+                    {
+                        ScanningComplete(this, new ScanningCompleteEventArgs(null));
+                    }
+                    catch { }
+
                 }
             }
         }

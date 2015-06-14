@@ -1,8 +1,9 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using log4net;
+
 
 namespace TwainDotNet.Win32
 {
@@ -11,7 +12,7 @@ namespace TwainDotNet.Win32
         /// <summary>
         /// The logger for this class.
         /// </summary>
-        static ILog log = LogManager.GetLogger(typeof(BitmapRenderer));
+        private static Logger log = LogManager.GetCurrentClassLogger();
 
         IntPtr _dibHandle;
         IntPtr _bitmapPointer;

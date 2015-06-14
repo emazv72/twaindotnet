@@ -15,9 +15,11 @@ namespace TwainDotNet.Wpf
         HwndSource _source;
         WindowInteropHelper _interopHelper;
         bool _usingFilter;
+        Window _window;
 
         public WpfWindowMessageHook(Window window)
         {
+            _window = window;
             _source = (HwndSource)PresentationSource.FromDependencyObject(window);
             _interopHelper = new WindowInteropHelper(window);            
         }
@@ -56,6 +58,15 @@ namespace TwainDotNet.Wpf
 
         public FilterMessage FilterMessageCallback { get; set; }
 
-        public IntPtr WindowHandle { get { return _interopHelper.Handle; } }
+        // Patch Emanuele: Invoke on dispatcher thread
+
+        public IntPtr WindowHandle
+        {
+            get
+            {
+                return (IntPtr)_window.Dispatcher.Invoke(new Func<IntPtr>(() => _interopHelper.Handle));
+            }
+        }
+
     }
 }
