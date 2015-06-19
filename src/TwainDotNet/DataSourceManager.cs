@@ -25,38 +25,55 @@ namespace TwainDotNet
 
         public DataSourceManager(Identity applicationId, IWindowsMessageHook messageHook)
         {
-            // Make a copy of the identity in case it gets modified
-            ApplicationId = applicationId.Clone();
 
-            ScanningComplete += delegate { };
-            TransferImage += delegate { };
-
-            _messageHook = messageHook;
-            _messageHook.FilterMessageCallback = FilterMessage;
-            IntPtr windowHandle = _messageHook.WindowHandle;
-
-            _eventMessage.EventPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(WindowsMessage)));
-
-            // Initialise the data source manager
-            TwainResult result = Twain32Native.DsmParent(
-                ApplicationId,
-                IntPtr.Zero,
-                DataGroup.Control,
-                DataArgumentType.Parent,
-                Message.OpenDSM,
-                ref windowHandle);
-
-            if (result == TwainResult.Success)
+            try
             {
-                //according to the 2.0 spec (2-10) if (applicationId.SupportedGroups
-                // | DataGroup.Dsm2) > 0 then we should call DM_Entry(id, 0, DG_Control, DAT_Entrypoint, MSG_Get, wh)
-                //right here
-                DataSource = DataSource.GetDefault(ApplicationId, _messageHook);
+
+                // Make a copy of the identity in case it gets modified
+                ApplicationId = applicationId.Clone();
+
+                ScanningComplete += delegate { };
+                TransferImage += delegate { };
+
+                _messageHook = messageHook;
+                _messageHook.FilterMessageCallback = FilterMessage;
+                IntPtr windowHandle = _messageHook.WindowHandle;
+
+                _eventMessage.EventPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(WindowsMessage)));
+
+
+                // Initialise the data source manager
+                TwainResult result = Twain32Native.DsmParent(
+                    ApplicationId,
+                    IntPtr.Zero,
+                    DataGroup.Control,
+                    DataArgumentType.Parent,
+                    Message.OpenDSM,
+                    ref windowHandle);
+
+                if (result == TwainResult.Success)
+                {
+                    //according to the 2.0 spec (2-10) if (applicationId.SupportedGroups
+                    // | DataGroup.Dsm2) > 0 then we should call DM_Entry(id, 0, DG_Control, DAT_Entrypoint, MSG_Get, wh)
+                    //right here
+                    DataSource = DataSource.GetDefault(ApplicationId, _messageHook);
+                }
+                else
+                {
+                    throw new TwainException("Error initialising DSM: " + result, result);
+                }
             }
-            else
+            catch (DllNotFoundException dlex)
             {
-                throw new TwainException("Error initialising DSM: " + result, result);
+
+                throw new TwainException("Error initialising DSM: (loading native dll): " + dlex.Message );
             }
+            catch (Exception ex)
+            {
+
+                throw new TwainException("Error initialising DSM: " + ex.Message);
+            }
+
         }
 
         ~DataSourceManager()
@@ -94,7 +111,7 @@ namespace TwainDotNet
                 if (!scanning)
                 {
                     EndingScan();
-                    
+
                     // Patch Emanuele: call complete event when scan fails
                     try
                     {
